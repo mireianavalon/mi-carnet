@@ -1,135 +1,156 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mi UPV - Mireia</title>
+    <title>Mi UPV</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        :root { --upv-red: #E43E33; --bg: #f5f5f5; }
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --upv-red: #E43E33; --bg: #f2f2f2; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        header { background: white; padding: 15px; text-align: center; border-bottom: 1px solid #ddd; flex-shrink: 0; }
-        header h1 { font-size: 18px; margin: 0; font-weight: bold; }
+        header { background: white; padding: 15px; text-align: center; border-bottom: 1px solid #ddd; font-weight: bold; font-size: 18px; }
 
-        .content-area { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
-        .tab-section { display: none; }
-        .tab-section.active { display: block; }
+        .main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
+        .pestaña { display: none; }
+        .pestaña.activa { display: block; }
 
         /* CARNET */
-        .card { width: 100%; height: 215px; perspective: 1000px; }
-        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; }
-        .card.flipped .card-inner { transform: rotateY(180deg); }
-        .front, .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; padding: 20px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .tarjeta { width: 100%; height: 210px; perspective: 1000px; }
+        .tarjeta-inner { position: relative; width: 100%; height: 100%; transition: 0.6s; transform-style: preserve-3d; }
+        .tarjeta.girada .tarjeta-inner { transform: rotateY(180deg); }
+        .cara { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; padding: 20px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        .front { background: var(--upv-red); position: relative; overflow: hidden; }
-        .profile-img { width: 95px; height: 125px; background: #eee; float: left; margin-right: 15px; object-fit: cover; border: 2px solid white; }
-        .card-logo-bg { position: absolute; bottom: 5px; right: 15px; font-size: 80px; font-weight: 900; opacity: 0.15; }
+        .delante { background: var(--upv-red); overflow: hidden; }
+        .foto { width: 90px; height: 120px; background: #ddd; float: left; margin-right: 15px; border: 2px solid white; object-fit: cover; }
+        .logo-bg { position: absolute; bottom: -5px; right: 10px; font-size: 70px; font-weight: 900; opacity: 0.15; }
         
-        .back { background: #2c3e50; transform: rotateY(180deg); display: flex; flex-direction: column; justify-content: center; }
-        .data-row { margin-bottom: 15px; border-left: 4px solid var(--upv-red); padding-left: 12px; }
-        .data-row label { display: block; font-size: 11px; color: #bdc3c7; text-transform: uppercase; font-weight: bold; }
-        .data-row span { font-size: 18px; font-weight: bold; color: white; }
+        .detras { background: #2c3e50; transform: rotateY(180deg); display: flex; flex-direction: column; justify-content: center; }
+        .dato { border-left: 3px solid var(--upv-red); padding-left: 10px; margin-bottom: 12px; }
+        .dato label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; }
+        .dato span { font-size: 16px; font-weight: bold; color: white; }
 
-        /* BARRAS */
-        .barcode-box { background: white; margin-top: 25px; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        /* ELEMENTOS DE LISTA */
+        .btn-barras { background: white; margin-top: 20px; padding: 18px; border-radius: 12px; text-align: center; color: var(--upv-red); font-weight: bold; border: 1px solid #ddd; font-size: 16px; }
+        .item { background: white; padding: 15px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid var(--upv-red); display: flex; align-items: center; gap: 12px; }
+        .icon-box { font-size: 20px; width: 30px; text-align: center; }
 
-        /* OTROS */
-        .item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid var(--upv-red); display: flex; align-items: center; gap: 15px; }
-        .cal { background: white; padding: 15px; border-radius: 15px; display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 8px; }
-        .today { background: var(--upv-red); color: white; border-radius: 50%; width: 30px; height: 30px; line-height: 30px; margin: 0 auto; }
+        /* CALENDARIO */
+        .cal-grid { background: white; padding: 15px; border-radius: 12px; display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 8px; }
+        .hoy { background: var(--upv-red); color: white; border-radius: 50%; width: 28px; height: 28px; line-height: 28px; margin: 0 auto; }
 
-        /* NAV */
-        nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; padding: 10px 0; z-index: 10; }
-        .nav-btn { flex: 1; text-align: center; font-size: 11px; color: #888; }
-        .nav-btn.active { color: var(--upv-red); }
-        .nav-btn i { display: block; font-size: 20px; margin-bottom: 3px; }
+        /* NAVEGACIÓN */
+        nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; padding: 10px 0; z-index: 100; }
+        .nav-item { flex: 1; text-align: center; font-size: 11px; color: #888; cursor: pointer; }
+        .nav-item.active { color: var(--upv-red); font-weight: bold; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
 
         /* MODAL */
-        #modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:100; flex-direction:column; align-items:center; justify-content:center; }
+        #modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:200; flex-direction:column; align-items:center; justify-content:center; }
         #modal svg { transform: rotate(90deg); width: 75vh; }
     </style>
 </head>
 <body>
 
-<header><h1>MiUPV</h1></header>
+<header>MiUPV</header>
 
-<div class="content-area">
-    <div id="sec-carnet" class="tab-section active">
-        <div class="card" onclick="this.classList.toggle('flipped')">
-            <div class="card-inner">
-                <div class="front">
-                    <img src="foto.jpg" class="profile-img" onerror="this.src='https://via.placeholder.com/95x125?text=FOTO'">
-                    <div style="font-weight: bold; text-transform: uppercase; font-size: 16px;">Navalón Fernández,<br>Mireia</div>
-                    <div style="margin-top: 12px; font-size: 14px; font-weight: bold;">ESTUDIANTE</div>
-                    <div style="font-size: 12px; opacity: 0.9;">Grado en Ingenieria de telecomunicaciones</div>
-                    <div class="card-logo-bg">UPV</div>
+<div class="main">
+    <div id="p-carnet" class="pestaña activa">
+        <div class="tarjeta" onclick="this.classList.toggle('girada')">
+            <div class="tarjeta-inner">
+                <div class="cara delante">
+                    <img src="foto.jpg" class="foto" onerror="this.src='https://via.placeholder.com/90x120?text=FOTO'">
+                    <div style="font-weight:bold; font-size: 15px; text-transform: uppercase;">NAVALÓN FERNÁNDEZ,<br>MIREIA</div>
+                    <div style="margin-top:12px; font-weight:bold; font-size:13px;">ESTUDIANTE</div>
+                    <div style="font-size:11px; opacity:0.9; line-height: 1.2;">Grado en Ingenieria de telecomunicaciones</div>
+                    <div class="logo-bg">UPV</div>
                 </div>
-                <div class="back">
-                    <div class="data-row"><label>EXPEDIENTE</label><span>2022045678</span></div>
-                    <div class="data-row"><label>NACIMIENTO</label><span>18/08/2001</span></div>
-                    <div class="data-row"><label>CADUCIDAD</label><span>30/09/2028</span></div>
+                <div class="cara detras">
+                    <div class="dato"><label>Expediente</label><span>2022045678</span></div>
+                    <div class="dato"><label>Nacimiento</label><span>18/08/2001</span></div>
+                    <div class="dato"><label>Caducidad</label><span>30/09/2028</span></div>
                 </div>
             </div>
         </div>
-        <div class="barcode-box" onclick="verBarras()">
-            <i class="fa-solid fa-barcode" style="font-size: 35px; color: var(--upv-red);"></i>
-            <div style="color: var(--upv-red); font-weight: bold; margin-top: 5px;">Codi de barres</div>
+        <div class="btn-barras" onclick="abrirBarras()">Ver Codi de barres</div>
+    </div>
+
+    <div id="p-avisos" class="pestaña">
+        <h3 style="margin-top:0">Avisos</h3>
+        <div class="item" style="border-left-color: #f1c40f;">
+            <div class="icon-box">📢</div>
+            <div><b>Actas publicadas</b><br><small>Disponible acta de Acústica.</small></div>
+        </div>
+        <div class="item">
+            <div class="icon-box">📚</div>
+            <div><b>Reserva Biblioteca</b><br><small>Mesa 12 confirmada (10:00).</small></div>
         </div>
     </div>
 
-    <div id="sec-avisos" class="tab-section">
-        <h3 style="color:#444">Avisos</h3>
-        <div class="item"><div><b>Reserva Biblioteca</b><br><small>Confirmada: Mesa 12 (Central)</small></div></div>
-        <div class="item" style="border-left-color: #f1c40f;"><div><b>Actas publicadas</b><br><small>Consulta tus notas de Telecomunicaciones.</small></div></div>
-    </div>
-
-    <div id="sec-cal" class="tab-section">
-        <h3 style="text-align: center; color:#444">Abril 2026</h3>
-        <div class="cal">
+    <div id="p-cal" class="pestaña">
+        <h3 style="text-align:center; margin-top:0">Abril 2026</h3>
+        <div class="cal-grid">
             <div style="color:#999">L</div><div style="color:#999">M</div><div style="color:#999">X</div><div style="color:#999">J</div><div style="color:#999">V</div><div style="color:#999">S</div><div style="color:#999">D</div>
             <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
             <div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
-            <div>15</div><div>16</div><div>17</div><div class="today">18</div><div>19</div><div>20</div><div>21</div>
+            <div>15</div><div>16</div><div>17</div><div class="hoy">18</div><div>19</div><div>20</div><div>21</div>
         </div>
     </div>
 
-    <div id="sec-serv" class="tab-section">
-        <h3 style="color:#444">Serveis</h3>
-        <div class="item"><i class="fa-solid fa-square-p" style="color:#3498db"></i> Aparcament</div>
-        <div class="item"><i class="fa-solid fa-book" style="color:#2ecc71"></i> Biblioteca</div>
-        <div class="item"><i class="fa-solid fa-utensils" style="color:#e67e22"></i> Polisabores</div>
+    <div id="p-serv" class="pestaña">
+        <h3 style="margin-top:0">Serveis</h3>
+        <div class="item">
+            <div class="icon-box">🚗</div>
+            <div><b>Aparcament</b><br><small>Disponibilidad en tiempo real</small></div>
+        </div>
+        <div class="item">
+            <div class="icon-box">📖</div>
+            <div><b>Biblioteca</b><br><small>Reserva de puestos y libros</small></div>
+        </div>
+        <div class="item">
+            <div class="icon-box">🍱</div>
+            <div><b>Beca comedor</b><br><small>Consulta de saldo y menús</small></div>
+        </div>
     </div>
 </div>
 
 <div id="modal" onclick="this.style.display='none'">
-    <svg id="code"></svg>
-    <p style="margin-top: 50px; font-weight: bold; letter-spacing: 2px;">2022045678</p>
-    <small style="color:#888">Toca para cerrar</small>
+    <svg id="codigo"></svg>
+    <p style="margin-top:40px; font-weight:bold; letter-spacing: 1px;">2022045678</p>
+    <p style="font-size:12px; color:#888">Toca para cerrar</p>
 </div>
 
 <nav>
-    <div class="nav-btn" onclick="tab('sec-avisos', this)"><i class="fa-regular fa-bell"></i>Avisos</div>
-    <div class="nav-btn" onclick="tab('sec-cal', this)"><i class="fa-regular fa-calendar"></i>Calendari</div>
-    <div class="nav-btn active" onclick="tab('sec-carnet', this)"><i class="fa-regular fa-id-card"></i>Carnet</div>
-    <div class="nav-btn" onclick="tab('sec-serv', this)"><i class="fa-solid fa-grip"></i>Serveis</div>
+    <div class="nav-item" onclick="ver('p-avisos', this)"><span class="nav-icon">🔔</span>Avisos</div>
+    <div class="nav-item" onclick="ver('p-cal', this)"><span class="nav-icon">📅</span>Calendari</div>
+    <div class="nav-item active" onclick="ver('p-carnet', this)"><span class="nav-icon">🪪</span>Carnet</div>
+    <div class="nav-item" onclick="ver('p-serv', this)"><span class="nav-icon">⚙️</span>Serveis</div>
 </nav>
 
 <script>
-    function tab(id, el) {
-        document.querySelectorAll('.tab-section').forEach(s => s.style.display = 'none');
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    function ver(id, el) {
+        // Ocultar todas las pestañas
+        var tabs = document.getElementsByClassName('pestaña');
+        for(var i=0; i<tabs.length; i++) { tabs[i].style.display = 'none'; }
+        
+        // Quitar active de botones
+        var btns = document.getElementsByClassName('nav-item');
+        for(var i=0; i<btns.length; i++) { btns[i].classList.remove('active'); }
+        
+        // Mostrar la actual
         document.getElementById(id).style.display = 'block';
         el.classList.add('active');
     }
 
-    function verBarras() {
+    function abrirBarras() {
         document.getElementById('modal').style.display = 'flex';
-        JsBarcode("#code", "2022045678", { format: "CODE128", displayValue: false, width: 2.5, height: 100 });
+        JsBarcode("#codigo", "2022045678", {
+            format: "CODE128", 
+            displayValue: false,
+            width: 2,
+            height: 100
+        });
     }
 </script>
 </body>
