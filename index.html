@@ -4,7 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MiUPV - Mireia</title>
+    <title>MiUPV</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="https://www.upv.es/favicon.ico">
+    <link rel="icon" type="image/png" href="https://www.upv.es/favicon.ico">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
@@ -63,7 +69,7 @@
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 <div class="sidebar" id="sidebar">
     <div style="padding: 20px; font-weight: bold; border-bottom: 2px solid var(--upv-red);">Menú MiUPV</div>
-    <a href="#" class="menu-link" onclick="goLogin()"><i class="fa-solid fa-gear"></i> Ajustos</a>
+    <a href="#" class="menu-link" onclick="goLogin()"><i class="fa-solid fa-gear"></i> Configuració</a>
     <a href="#" class="menu-link" onclick="goLogin()"><i class="fa-solid fa-circle-user"></i> El meu perfil</a>
     <a href="#" class="menu-link" onclick="goLogin()"><i class="fa-solid fa-language"></i> Canviar idioma</a>
     <a href="#" class="menu-link" onclick="goLogin()" style="color: var(--upv-red);"><i class="fa-solid fa-power-off" style="color: var(--upv-red);"></i> Tancar sessió</a>
