@@ -3,168 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mi UPV - Mireia</title>
+    <title>MiUPV - Mireia</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --upv-red: #E43E33; --bg: #f8f9fa; --text-gray: #666; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: var(--bg); color: #333; height: 100vh; display: flex; flex-direction: column; }
+        :root { --upv-red: #E43E33; --bg: #f8f9fa; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: var(--bg); display: flex; flex-direction: column; height: 100vh; }
         
-        /* Header */
-        header { background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #eee; z-index: 100; }
-        header h1 { font-size: 18px; margin: 0; flex-grow: 1; text-align: center; }
+        /* Contenedor de pantallas */
+        .page { display: none; padding: 20px; padding-bottom: 90px; height: 100%; overflow-y: auto; }
+        .page.active { display: block; }
 
-        /* Contenedores de Pestañas */
-        .tab-content { display: none; padding: 15px; flex-grow: 1; overflow-y: auto; padding-bottom: 80px; }
-        .tab-content.active { display: block; }
-
-        /* CARNET 3D ACTUALIZADO */
-        .flip-card { width: 100%; height: 210px; perspective: 1000px; margin-bottom: 25px; }
-        .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; }
-        .flip-card.active .flip-card-inner { transform: rotateY(180deg); }
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        /* Carnet Estilo Real */
+        .card-container { width: 100%; height: 220px; perspective: 1000px; cursor: pointer; }
+        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+        .card-container.flipped .card-inner { transform: rotateY(180deg); }
+        .front, .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .front { background: var(--upv-red); color: white; padding: 20px; box-sizing: border-box; }
+        .back { background: #2c3e50; color: white; transform: rotateY(180deg); padding: 25px; box-sizing: border-box; }
         
-        .card-front { background: var(--upv-red); color: white; padding: 15px; box-sizing: border-box; }
-        .profile-pic { width: 90px; height: 115px; background: #ddd; border: 2px solid white; object-fit: cover; float: left; margin-right: 15px; }
-        .user-data h2 { margin: 0; font-size: 16px; text-transform: uppercase; }
-        .upv-logo-bg { position: absolute; bottom: 5px; right: 15px; font-size: 80px; font-weight: 900; opacity: 0.2; }
+        /* Barra de navegación */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #ddd; z-index: 1000; }
+        .nav-item { text-align: center; color: #888; cursor: pointer; font-size: 12px; }
+        .nav-item.active { color: var(--upv-red); }
+        .nav-item i { display: block; font-size: 22px; margin-bottom: 2px; }
 
-        /* Trasera: Texto en Blanco para que se vea bien */
-        .card-back { background: #2c3e50; color: white; transform: rotateY(180deg); padding: 25px; box-sizing: border-box; }
-        .back-info div { margin-bottom: 15px; border-left: 3px solid var(--upv-red); padding-left: 12px; }
-        .back-info label { display: block; font-size: 11px; color: #bdc3c7; text-transform: uppercase; }
-        .back-info span { font-size: 17px; font-weight: bold; color: white; }
-
-        /* Código de Barras */
-        .barcode-btn { background: white; border-radius: 12px; padding: 20px; text-align: center; border: 1px solid #eee; margin-top: 10px; }
-        
-        /* Calendario */
-        .calendar-grid { background: white; border-radius: 12px; padding: 15px; display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 5px; }
-        .today { background: var(--upv-red); color: white; border-radius: 50%; width: 30px; height: 30px; line-height: 30px; margin: 0 auto; }
-
-        /* Avisos y Servicios */
-        .item-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-        .icon-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
-
-        /* Modal Barras */
-        #barcodeModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
-        #barcodeModal svg { transform: rotate(90deg); width: 70vh; }
-
-        /* Nav Inferior */
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0; }
-        .tab-item { flex: 1; text-align: center; font-size: 11px; color: #888; cursor: pointer; }
-        .tab-item.active { color: var(--upv-red); }
-        .tab-item i { display: block; font-size: 20px; margin-bottom: 4px; }
+        /* Estilos generales */
+        h2 { margin-top: 0; }
+        .section-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>MiUPV</h1>
-</header>
+<div id="avisos" class="page">
+    <h2>Avisos</h2>
+    <div class="section-card"><strong>Calificaciones:</strong> Tu nota de Estructuras I ha sido publicada.</div>
+    <div class="section-card"><strong>Biblioteca:</strong> Tienes un libro pendiente de devolver.</div>
+</div>
 
-<div id="tab-carnet" class="tab-content active">
-    <div class="flip-card" onclick="this.classList.toggle('active')">
-        <div class="flip-card-inner">
-            <div class="card-front">
-                <img src="foto.jpg" class="profile-pic" onerror="this.src='https://via.placeholder.com/90x115?text=FOTO'">
-                <div class="user-data">
-                    <h2>NAVALÓN FERNÁNDEZ,<br>MIREIA</h2>
-                    <p style="font-size: 13px; opacity: 0.9;">Estudiante Grado</p>
-                </div>
-                <div class="upv-logo-bg">UPV</div>
+<div id="calendari" class="page">
+    <h2>Calendario - Abril</h2>
+    <div class="section-card" style="text-align:center;">
+        <h3>18 de Abril</h3>
+        <p>Examen final de Fundamentos de Informática.</p>
+    </div>
+</div>
+
+<div id="carnet" class="page active">
+    <div class="card-container" onclick="this.classList.toggle('flipped')">
+        <div class="card-inner">
+            <div class="front">
+                <div style="font-weight:bold; font-size:1.2em;">MIREIA NAVALÓN FERNÁNDEZ</div>
+                <div style="margin-top:10px;">Estudiante de Grado</div>
             </div>
-            <div class="card-back">
-                <div class="back-info">
-                    <div><label>Expediente</label><span>2022045678</span></div>
-                    <div><label>Nacimiento</label><span>22/08/2003</span></div>
-                    <div><label>Caducidad</label><span>30/09/2028</span></div>
-                </div>
+            <div class="back">
+                <div style="color:#aaa;">Expediente:</div> <div>2022045678</div>
+                <div style="color:#aaa; margin-top:10px;">Caducidad:</div> <div>30/09/2028</div>
             </div>
         </div>
     </div>
-
-    <div class="barcode-btn" onclick="openBarcode()">
-        <i class="fa-solid fa-barcode" style="font-size: 40px; color: var(--upv-red);"></i>
-        <p style="color: var(--upv-red); font-weight: bold; margin: 10px 0 0;">Codi de barres</p>
+    <div class="section-card" style="text-align:center; margin-top:20px;" onclick="document.getElementById('modal').style.display='flex'">
+        <i class="fa-solid fa-barcode" style="font-size:40px; color:var(--upv-red);"></i>
+        <p>Codi de barres</p>
     </div>
 </div>
 
-<div id="tab-calendar" class="tab-content">
-    <h3 style="margin-top:0">Abril 2026</h3>
-    <div class="calendar-grid">
-        <div style="font-weight:bold">L</div><div style="font-weight:bold">M</div><div style="font-weight:bold">X</div><div style="font-weight:bold">J</div><div style="font-weight:bold">V</div><div style="font-weight:bold">S</div><div style="font-weight:bold">D</div>
-        <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
-        <div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
-        <div>15</div><div>16</div><div>17</div><div class="today">18</div><div>19</div><div>20</div><div>21</div>
-        <div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div>
-    </div>
+<div id="servici" class="page">
+    <h2>Serveis UPV</h2>
+    <div class="section-card">🚗 Aparcamiento: Disponible en P1.</div>
+    <div class="section-card">📚 Biblioteca: 4 puestos disponibles.</div>
+    <div class="section-card">🍽️ Polisabores: Menú de hoy disponible.</div>
 </div>
 
-<div id="tab-avisos" class="tab-content">
-    <h3>Avisos Recientes</h3>
-    <div class="item-card" style="border-left: 5px solid #f1c40f;">
-        <div>
-            <div style="font-weight:bold">Nota de examen publicada</div>
-            <div style="font-size:13px; color:#666">Matemáticas II - Parcial 2. Ya puedes consultarla.</div>
-        </div>
-    </div>
-    <div class="item-card" style="border-left: 5px solid var(--upv-red);">
-        <div>
-            <div style="font-weight:bold">Recogida de Título</div>
-            <div style="font-size:13px; color:#666">Cita previa confirmada para mañana a las 10:00.</div>
-        </div>
-    </div>
+<div class="nav-bar">
+    <div class="nav-item" onclick="showPage('avisos')"><i class="fa-solid fa-bell"></i>Avisos</div>
+    <div class="nav-item" onclick="showPage('calendari')"><i class="fa-solid fa-calendar"></i>Calendari</div>
+    <div class="nav-item active" onclick="showPage('carnet')"><i class="fa-solid fa-id-card"></i>Carnet</div>
+    <div class="nav-item" onclick="showPage('servici')"><i class="fa-solid fa-grip-vertical"></i>Serveis</div>
 </div>
 
-<div id="tab-servicios" class="tab-content">
-    <h3>Servicios UPV</h3>
-    <div class="item-card">
-        <div class="icon-circle" style="background:#3498db"><i class="fa-solid fa-square-p"></i></div>
-        <div><div style="font-weight:bold">Aparcamiento</div><div style="font-size:12px">Plazas libres y acceso</div></div>
-    </div>
-    <div class="item-card">
-        <div class="icon-circle" style="background:#2ecc71"><i class="fa-solid fa-book"></i></div>
-        <div><div style="font-weight:bold">Biblioteca</div><div style="font-size:12px">Reserva de mesas y libros</div></div>
-    </div>
-    <div class="item-card">
-        <div class="icon-circle" style="background:#e67e22"><i class="fa-solid fa-utensils"></i></div>
-        <div><div style="font-weight:bold">Polisabores</div><div style="font-size:12px">Menú diario comedores</div></div>
-    </div>
+<div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2000; justify-content:center; align-items:center;" onclick="this.style.display='none'">
+    <svg id="barcode"></svg>
 </div>
-
-<div id="barcodeModal">
-    <div style="position:absolute; top:20px; right:20px; font-size:30px" onclick="closeBarcode()">&times;</div>
-    <svg id="fullBarcode"></svg>
-    <p style="margin-top:50px; font-weight:bold">2022045678</p>
-</div>
-
-<nav class="tab-bar">
-    <div class="tab-item" onclick="showTab('avisos')"><i class="fa-regular fa-bell"></i>Avisos</div>
-    <div class="tab-item" onclick="showTab('calendar')"><i class="fa-regular fa-calendar"></i>Calendari</div>
-    <div class="tab-item active" onclick="showTab('carnet')"><i class="fa-regular fa-id-card"></i>Carnet</div>
-    <div class="tab-item" onclick="showTab('servicios')"><i class="fa-solid fa-grip"></i>Serveis</div>
-</nav>
 
 <script>
-    function showTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
-        document.getElementById('tab-' + tabName).classList.add('active');
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
         event.currentTarget.classList.add('active');
     }
-
-    function openBarcode() {
-        document.getElementById('barcodeModal').style.display = 'flex';
-        JsBarcode("#fullBarcode", "2022045678", { format: "CODE128", width: 3, height: 100, displayValue: false });
-    }
-    
-    function closeBarcode() {
-        document.getElementById('barcodeModal').style.display = 'none';
-    }
+    JsBarcode("#barcode", "2022045678", { format: "CODE128" });
 </script>
-
 </body>
 </html>
-
 
